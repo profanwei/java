@@ -1,0 +1,4 @@
+[
+	{title:"新增报修" ,iconCls:"icon-add",showCloseButton:false,url:"machineManage/addMachineRepairToo.jsp",refreshOnClick:true},
+	{title:"设备维修记录" ,iconCls:"icon-collapse",showCloseButton:false,url:"machineManage/MachineRepairList.jsp",refreshOnClick:true}
+]

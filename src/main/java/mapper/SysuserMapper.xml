@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="mapper.SysuserMapper">
+	
+	<select id="selectLoadDefaultSysuserInfo" parameterType="String" resultType="com.wl.forms.Employee">
+		select * from employee_info where staff_Code=#{staffCode}
+	</select>
+	
+	<select id="selecShowMyCustomertList" parameterType="String" resultType="com.wl.forms.Customer">
+		select * from customer where staffCode=#{staffCode} or createPerson=#{staffCode}
+	</select>
+	
+	
+	<select id="selectShowMyCustomertCount" parameterType="String" resultType="int">
+		select count(*) from customer where staffCode=#{staffCode} or createPerson=#{staffCode}
+	</select>
+	
+	
+	<update id="updateDoEditEmployeeDetail" >
+	
+		update employee_info set mobile_phone=#{connectorTel},section_code=#{sectionCode} where staff_code=#{staffCode}
+
+	</update>
+		<update id="updateDoEditCustomerDetail" >
+	
+		update customer set telephone=#{connectorTel},connectorTel=#{connectorTel}  where staffcode=#{staffCode}
+
+	</update>
+
+	<delete id="showCustomerDeleteMapper">
+	update customer set alive=2 where companyId=#{companyId}
+		
+	</delete>
+
+	<delete id="showEmployeeDeleteMapper">
+		delete from employee_info where staff_Code=#{staffCode}
+	</delete>
+	
+	<insert id="addMachineManagerMapper">
+			insert into  MACHINEMANAGER (machine_Id,MACHIne_manager_id,MACHINE_MANAGER) values(#{machineId},#{staffCode},#{staffName})
+	</insert>
+		<select id="panduanMachineManagerMapper" resultType="java.util.HashMap" >
+			select   MACHINE_MANAGER       from   MACHINEMANAGER    where   machine_Id=#{machineId} and  MACHIne_manager_id=   #{staffCode} 
+	</select>
+	<select id="loadMachineManagerMapper" parameterType="String" resultType="com.wl.forms.Employee">
+		select b.machinename,a.staff_code,a.staff_name,a.mobile_phone,c.deptname as sectionName from MACHINEMANAGER t 
+		left join employee_info a on t.machine_manager_id=a.staff_code 
+		left join machinfo b on t.machine_id=b.machineid
+  		left join dept c on a.section_code=c.deptid 
+		where t.machine_id=#{machineId}
+	</select>
+	
+	<delete id="deleteMachineManagerMapper" >
+		delete from MACHINEMANAGER where machine_manager_Id=#{staffCode} and machine_Id=#{machineId}
+	</delete>
+
+</mapper>
+

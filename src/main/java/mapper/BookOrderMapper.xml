@@ -1,0 +1,400 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<!-- <mapper>
+  <cache-ref namespace=""/>
+</mapper> -->
+<mapper namespace="mapper.BookOrderMapper">
+<cache></cache>
+		
+	
+	<select id="selectBookOrderCount" resultType="int" useCache="false">
+		select count(*) from orders B left join customer C on B.CUSTOMER=C.COMPANYID where B.order_status<![CDATA[<]]>11 and B.createPerson=#{staffCode}
+		
+		<!-- <where>
+  			<include refid="query_user_where"></include>
+  		</where> -->
+	</select>
+	<select id="selectMaxOrder" resultType="com.wl.forms.Machine" useCache="false">
+	select machineid from (select machineid t,machinename,rownum machineid from machinfo where dept_id=(select b.dept_id from (select count(*) c,machineid from bookinginfo where time_ymd between #{begin} and #{end}  group by machineid) a  
+left join machinfo b on a.machineid=b.machineid
+where c=(select max(c) from (select count(*) c,machineid from bookinginfo where time_ymd between #{begin} and #{end} group by machineid))and rownum &lt;= 1) order by t) 
+where t=(select a.machineid from (select count(*) c,machineid from bookinginfo where time_ymd between #{begin} and #{end} group by machineid) a  
+left join machinfo b on a.machineid=b.machineid
+where c=(select max(c) from (select count(*) c,machineid from bookinginfo where time_ymd between #{begin} and #{end} group by machineid))and rownum &lt;= 1)
+</select>
+	<select id="returnGante" resultType="com.fw.tools.MachineGante">
+select powerstatus status from (select distinct substr(to_char(to_date(createtime,'yyyy-mm-dd hh24:mi:ss'),'yyyy-MM-dd HH24:mi:ss'),0,17)||'00' shijian,powerstatus from machine_5506 where powerstatus='open' and createtime like '%${date}%' order by shijian asc) where shijian like '%${dt}%'
+</select>
+	<select id="returnGanteFanuc" resultType="com.fw.tools.MachineGante">
+	select powerstatus status from(select distinct substr(to_char(to_date(createtime,'yyyy-mm-dd hh24:mi:ss'),'yyyy-MM-dd HH24:mi:ss'),0,17)||'00' shijian,is_open powerstatus from machine_5505 where  is_open='开机' and createtime like '${date}%' order by shijian asc) where shijian like '%${dt}%'
+</select>
+	<select id="selectMaxDept" resultType="com.wl.forms.Machine" useCache="false">
+	select deptid from (select deptid id,rownum deptid  from dept where fdeptid= '056' order by id) where id=
+(select b.dept_id from (select count(*) c,machineid from bookinginfo where time_ymd between #{begin} and #{end} group by machineid) a  
+left join machinfo b on a.machineid=b.machineid
+where c=(select max(c) from (select count(*) c,machineid from bookinginfo where time_ymd between #{begin} and #{end} group by machineid))and rownum &lt;= 1)
+</select>
+	<select id="isCanBookMapper" resultType="int" useCache="false">
+		select count(*) from ORDERS t where t.createperson=#{staffCode} and t.upload_date &lt;= #{systemTime} and book_status='13' 
+	</select>
+	
+		<select id="selectpanduan" resultType="int" useCache="false">
+		select count(*) from bookinginfo t where t.unid=#{unid} and t.is_pass='是'
+	</select>
+
+	
+	<select id="selectBookOrderList" resultType="com.wl.forms.Order" useCache="false">
+			
+		 select * from orders a  
+		 left join customer b on a.CUSTOMER=b.COMPANYID <!-- left join dept c on b.DEPT_USER=c.deptid  -->
+		 where a.book_status>=0 and 
+		 
+		 <if test="bookStatus != ''">
+           a.book_status = '${bookStatus}'
+        </if>
+         
+        <if test="bookStatus == ''">
+          a.book_status like '%%'
+        </if>
+        
+		   and a.customer like '%${companyId}%' 
+		  		and a.createperson like '%${staffCode}%' and a.order_Id like '%${orderId}%'
+	</select>
+	
+		<select id="selectBookOrderList11" resultType="com.wl.forms.Order" useCache="false">
+			
+		 select * from orders a  
+		 left join customer b on a.CUSTOMER=b.COMPANYID <!-- left join dept c on b.DEPT_USER=c.deptid  -->
+		 where a.book_status>=0 and 
+		 
+		 <if test="bookStatus != ''">
+           a.book_status = '${bookStatus}'
+        </if>
+         
+        <if test="bookStatus == ''">
+          a.book_status like '%%'
+        </if>
+        
+		   and a.customer like '%${companyId}%' 
+		  		 and a.order_Id like '%${orderId}%'
+	</select>
+	<select id="selectBookOrderList1" resultType="com.wl.forms.Order" useCache="false">
+		<!-- select * from orders e where  e.book_status='12' and e.order_id in
+		(select distinct order_id 
+		from (select a.order_id,c.machineid from orders a 
+		left join (select b.orderid, machineId from   BOOKINGINFO b  group by machineId,orderId) c 
+		on a.order_id=c.orderid  where c.machineid
+		 in(select f.machine_id from machineManager f where f.machine_manager_id='70205886') ) g) --> 		
+		
+		select * from orders e  left join customer k on e.customer=k.companyId
+		
+		
+		where (e.book_status=#{bookStatus} or e.book_status='12.5') and e.order_id in
+		(select distinct order_id 
+		from (select a.order_id,c.machineid from orders a 
+		left join (select b.orderid,  machineId from   BOOKINGINFO b  group by machineId,orderId) c 
+		on a.order_id=c.orderid  where c.machineid
+		in(select f.machine_id from machineManager f where f.machine_manager_id=#{staffCode}) ) g) 
+
+	</select>
+	<select id="selectCompletedBookOrderList" resultType="com.wl.forms.Order" useCache="false">
+		select * from orders e  left join customer k on e.customer=k.companyId where  e.book_Status=#{bookStatus};
+	</select>
+	
+	<select id="selectBookOrderListToo" resultType="com.wl.forms.Order" useCache="false">
+			
+			
+		 select * from orders a  
+		 left join customer b on a.CUSTOMER=b.COMPANYID <!-- left join dept c on b.DEPT_USER=c.deptid  -->
+		 where a.book_status>0 and 
+		 
+		 <if test="bookStatus !='' and bookStatus !='13'">
+           a.book_status = '${bookStatus}' 
+        </if>
+         <if test=" bookStatus =='13' ">
+           a.book_status in ('13','15')
+        </if>
+         
+        <if test="bookStatus == ''">
+          a.book_status in ('15','16')
+        </if>
+        
+		   and a.customer like '%${companyId}%' 
+		  		and a.createperson like '%${staffCode}%' and a.order_Id like '%${orderId}%'
+	   
+	</select>
+	
+	<!--  修改的 select * from orders a  left join customer b on a.CUSTOMER=b.COMPANYID 
+		  where a.book_status>0 and (a.book_status like '%${bookStatus}%' or a.book_status = '15') 
+		  and a.customer like '%${companyId}%' and a.createperson like '%${staffCode}%' and a.order_Id like '%${orderId}%' -->
+	
+	<!--  -->
+	
+	<!-- <sql id="query_user_where">
+		orders.order_status<![CDATA[ < ]]>11
+	</sql> -->
+	  
+	<select id="selectBookOrderMachineListByOrderId" resultType="javaBean.BookOrderMachine" useCache="false">
+		select * from bookingINfo A left join machinfo B on a.machineid=b.machineid  left join orders D on d.order_id=A.orderID where orderId=#{orderId} and is_Pass ='是' <!-- and a.is_pass !='否' -->
+	</select>
+		<select id="selectBookOrderMachineListByOrderId3" resultType="javaBean.BookOrderMachine" useCache="false">
+	select * from (select t.passstate pass_state,t.unid,t.machineid,t.time_ymd,t.starttime_info,t.endtime_info,t.machine_status,t.comments from BOOKINGINFO t left join machinfo  B on t.machineid=b.machineid  left join orders D on d.order_id=t.orderID where orderId=#{orderId} and is_Pass ='是' 
+       union
+      select s.pass_state ,s.unid,s.machine_id,s.time_ymd,s.start_time_info,s.end_time_info,s.machine_status,s.comments from BOOKINGINFO_COMPLETED s left join machinfo  B on s.machine_id=b.machineid  left join orders D on d.order_id=s.order_ID where s.order_Id=#{orderId} )
+	</select>
+	<select id="selectBookOrderMachineListByOrderId2" resultType="javaBean.BookOrderMachine" useCache="false">
+		select * from bookingINfo A  left join (select count(*) totalTime1,orderId s from bookinginfo where orderId=#{orderId} and (is_pass='是' or is_pass is NULL)   group by orderId )Z on z.s=a.orderid left join (select count(*) totalTime,machineid from bookingINfo where orderId=#{orderId} and (is_pass='是' or is_pass is NULL) group by machineid) Q on q.machineid=a.machineid  left join machinfo B on a.machineid=b.machineid  left join orders D on d.order_id=A.orderID where orderId=#{orderId} <!-- and a.is_pass !='否' -->
+	</select>
+	
+	<select id="selectBookOrderMachineListByOrderId1" resultType="javaBean.BookOrderMachine" useCache="false">
+		select * from bookingINfo A 
+		left join machinfo B on a.machineid=b.machineid   
+		left join orders D on d.order_id=A.orderID  
+		left join employee_info k  on a.audit_person=k.staff_code 
+		where orderId=#{orderId}  and  a.machineid in
+(select c.machine_id from MACHINEMANAGER c where  c.machine_manager_id=#{staffCode})
+	</select>
+	
+	 
+	<!-- 返回已完成订单的list -->
+	
+	
+		<select id="completedBookMapper" resultType="javaBean.BookOrderMachine" useCache="false">
+		select * from Bookinginfo_Completed A left join machinfo B on a.machine_id=b.machineid left join orders D on d.order_id=A.order_ID  where a.order_Id=#{orderId} and a.pass_state in(2,4)
+	</select>
+	
+			<select id="completedBookMapper11" resultType="javaBean.BookOrderMachine" useCache="false">
+		select * from Bookinginfo_Completed A  left join(select order_id , sum(to_number(substr(end_time_info,1,2))-to_number(substr(start_time_info,1,2))) totalTime1 from BOOKINGINFO_COMPLETED t where order_id=#{orderId} and pass_state in(2,3) group by order_id) H on A.order_id=H.order_id left join(select machine_id , sum(to_number(substr(end_time_info,1,2))-to_number(substr(start_time_info,1,2))) totalTime from BOOKINGINFO_COMPLETED t where order_id=#{orderId} and pass_state in(2,3) group by machine_id) P on P.machine_id=A.machine_id left join machinfo B on a.machine_id=b.machineid left join orders D on d.order_id=A.order_ID  where a.order_Id=#{orderId} and a.pass_state in(2,3)
+	</select>
+	
+	
+	<select id="AuditingBookUpdateStatusMapper" resultType="com.wl.forms.Order" useCache="false"> 
+			select A.*,b.*,C.*,<!-- d.staff_Name completed_staff_name, -->e.companyName  from Orders A  
+			left join ORDERBOOKSTATUS B on a.book_Status=B.bookStatus 
+			left join EMPLOYEE_INFO C on c.staff_code=A.auditing_staff_code 
+			left join EMPLOYEE_INFO d on d.staff_code=A.completed_staff_code 
+			left join customer e on e.companyId=a.customer 
+			where order_id =#{orderId}
+	</select>
+	<!-- 这个是修改后的预约审核意见的和审核人的反馈 -->
+	<select id="AuditingBookUpdateStatusMapper1" resultType="com.wl.forms.OrdersMachinesAudits" useCache="false">
+			select t.order_id,t.machine_id ,t.yes_no,t.audit_person,a.machinename,b.staff_name ,(case when  t.audit_person is null then '' else CONCAT('已审核，意见为：',t.advice） end) as advice  from ORDERSMACHINESAUDITS t  
+      left Join machinfo  a on a.machineid=t.machine_id  left join employee_info b on b.staff_code=t.audit_person where  t.order_id=#{orderId}
+	</select> 
+	 
+<!-- 	 <select id="getLeftJoinMap"  resultMap="leftJoinMap">
+        select a.order_id,a.customer,b.companyId,b.companyName from orders a left join customer b on a.customer=b.companyId left join employee_info
+    </select> -->
+
+    <!-- resultMap中的type表示返回什么类型的对象 -->
+<!--     <resultMap type="com.wl.forms.Order" id="leftJoinMap">
+        property 表示com.mybatis.bean.StudentTemp中的属性； column 表示表中的列名
+        <id property="orderId" column="order_id" />
+        <result property="customer" column="customer" />
+
+        association字面意思关联，这里只专门做一对一关联； property表示是上面中的Order中的一个Customer类的属性，相当于嵌套属性了 
+            javaType表示该属性是什么类型对象
+        <association property="employee" javaType="com.wl.forms.Employee">这个最重要，其他的只要名字没有不同，就不要自己进行转换了；所以尽量实体类要和数据库列相同
+            property 表示com.mybatis.bean.Class中的属性； column 表示表中的列名
+            <id property="staffCode" column="staff_code" />
+            
+        </association>
+    </resultMap> -->
+	
+	
+	
+	
+	<delete id="noPassDeleteAuditingBookOrderMapper">
+          delete from bookingInfo   where orderId=#{orderId}     
+     </delete>
+	<delete id="noPassDeleteAuditingBookOrderMapper13" >
+          delete from bookingInfo   where orderId=#{orderId}  and machine_Id=#{machineId}   
+     </delete>
+     
+     
+ 	<select id="selectTime" resultType="String" useCache="false">
+	select min(t.time_ymd ) from BOOKINGINFO t where orderid=#{orderId}
+	</select>    
+	 	<select id="selectNum" resultType="int" useCache="false">
+select count(*) from BOOKINGINFO_completed t where order_id=#{orderId}
+	</select>   
+     
+	<select id="loadDefaultShiYanOrder" resultType="com.wl.forms.Customer" useCache="false">
+			select * from customer A   where staffcode =#{staffCode}
+	</select>
+	
+	
+	<resultMap id="bookOrder" type="com.wl.forms.Order">
+        
+        <result column="machineName" property="machineName" />
+        <result column="time_ymd" property="timeYmd" />
+        <result column="startTimeInfo" property="endTimeInfo" />
+        <result column="bookState" property="bookState" />
+    </resultMap>
+    
+
+    
+    <update id="updateAuditingBookStatus" >
+          update orders 
+        	set book_Status=#{bookStatus} ,auditing_staff_code=#{auditingStaffCode},checkAdvice=#{checkAdvice}
+         where order_Id=#{orderId}     
+     </update>
+     
+     
+     <update id="completedOrderAuditMapper" >
+          update orders 
+        	set book_Status=#{bookStatus} ,completed_staff_code=#{staffCode},completed_Advice=#{completedAdvice}
+         where order_Id=#{orderId}     
+     </update>
+          <update id="completedOrderAuditMapper1" >
+          update orders 
+        	set book_Status='13',completed_staff_code=#{staffCode},completed_Advice=#{completedAdvice}
+         where order_Id=#{orderId}     
+     </update>
+     
+     <update id="deleteAuditingBookOrderMapper" >
+          delete from bookingInfo  where unid=#{unid}     and orderid=#{orderId}
+     </update>
+     
+     <delete id="deleteAuditingOrderMapper" >
+          update orders  set book_status='0' where order_id=#{orderId}     
+     </delete>
+     
+          <delete id="deleteOrder" >
+         delete from orders  where order_id=#{orderId}     
+     </delete>
+     
+     
+     <delete id="deleteAuditingOrderbookingInfoMapper" >
+          delete from bookingInfo  
+         where orderId=#{orderId}     
+     </delete>
+    
+    <insert id="insertAddShiYanOrder" >
+	    	insert into orders (ORDER_ID,CUSTOMER,CREATEPERSON,CREATETIME,connector,connectorTel,book_status,order_name,productnum,material) 
+	    	values (#{orderId,jdbcType=VARCHAR},#{customer,jdbcType=VARCHAR},#{staffCode,jdbcType=VARCHAR},to_date(#{createTime,jdbcType=VARCHAR},'yyyy-mm-dd,hh24:mi:ss'),#{connector,jdbcType=VARCHAR},#{connectorTel,jdbcType=VARCHAR},#{bookOrderStatus,jdbcType=VARCHAR},#{orderName,jdbcType=VARCHAR},#{productNum,jdbcType=VARCHAR},#{material,jdbcType=VARCHAR})
+    	
+    </insert>
+    
+    <update id="insertCompletedAuditerInfoMapper">
+    	update orders set COMPLETED_STAFF_CODE = #{staffCode} where order_Id=#{orderId}
+    </update>
+   
+    <update id="updateCompletedOrderInfoMapper">
+   		update orders set book_Status =	#{bookStatus} where order_Id=#{orderId}
+    </update>
+	
+	
+	     
+     <delete id="deleteSelectedBookingInfo" >
+          delete from bookingInfo  where  unid=#{unid}     and is_pass  is null
+    </delete>
+     <update id="deleteSelectedBookingInfoByAudit" >
+          update bookingInfo  set is_pass='否'  where  unid=#{unid}     
+    </update>
+	
+
+    <insert id="saveCompletedBookingInfoMapper" >
+    	insert into BOOKINGINFO_COMPLETED (unid,order_Id,start_time_info,end_time_info,machine_id,time_ymd,pass_state,machine_status,comments<!-- ,COMPLETED_REMARKS -->) 
+    	values (#{unid},#{orderId},#{startTimeInfo},#{endTimeInfo},#{machineID},#{timeYmd},'2',#{machineStatus},#{comments}<!-- ,#{completedRemarks} -->)
+    </insert>
+    <insert id="saveCompletedBookingInfo" >
+    	insert into BOOKINGINFO_COMPLETED (unid,order_Id,start_time_info,end_time_info,machine_id,time_ymd,pass_state,machine_status,comments<!-- ,COMPLETED_REMARKS -->) 
+    	values (#{unid},#{orderId},#{startTimeInfo},#{endTimeInfo},#{machineID},#{timeYmd},'4',#{machineStatus},#{comments}<!-- ,#{completedRemarks} -->)
+    </insert>
+        <insert id="saveCompletedBookingInfo2" >
+    	insert into BOOKINGINFO_COMPLETED (unid,order_Id,start_time_info,end_time_info,machine_id,time_ymd,pass_state,machine_status,comments<!-- ,COMPLETED_REMARKS -->) 
+    	values (#{unid},#{orderId},#{startTimeInfo},#{endTimeInfo},#{machineID},#{timeYmd},#{passState},#{machineStatus},#{comments}<!-- ,#{completedRemarks} -->)
+    </insert>
+            <update id="updatebookinginfo" >
+   update bookinginfo t set t.passstate='2',t.machine_status=#{machineStatus},t.comments=#{comments}  where unid=#{unid}
+    </update>
+     <update id="updatebookinginfo1" >
+   update BOOKINGINFO_COMPLETED t set t.pass_state='3' where order_id=#{orderId} and pass_state='2'
+    </update>
+    <update id="updatebookinginfo2" >
+   update BOOKINGINFO t set t.passstate='3' where orderid=#{orderId} and passstate='2'
+    </update>
+    <delete id="updatebookinginfo3" >
+   delete from BOOKINGINFO_COMPLETED t  where order_id=#{orderId} and pass_state='2'
+    </delete>
+        <update id="updatebookinginfo4" >
+   update BOOKINGINFO t set t.passstate='1',t.machine_status='',t.comments='' where orderid=#{orderId} and passstate='2'
+    </update>
+         <update id="updatebookinginfo5" >
+   update BOOKINGINFO_COMPLETED t set t.pass_state='5'  where order_id=#{orderId} and pass_state='4'
+    </update> 
+     <update id="updatebookinginfo6" >
+   update BOOKINGINFO t set t.passstate='5' where orderid=#{orderId} and passstate='4'
+    </update>
+    <delete id="updatebookinginfo7" >
+   delete from BOOKINGINFO_COMPLETED t  where order_id=#{orderId} and pass_state='4'
+    </delete>
+        <update id="updatebookinginfo8" >
+   update BOOKINGINFO t set t.passstate='1',t.machine_status='',t.comments='' where orderid=#{orderId} and passstate='4'
+    </update>
+        <update id="saveCompletedBookingInfoMapper1">
+   update bookinginfo t set t.passstate='4',t.machine_status=#{machineStatus},t.comments=#{comments} where unid=#{unid}
+    </update>
+    <delete id="deleteCompletedBookingInfoMapper">
+    	delete from BOOKINGINFO_COMPLETED where order_id=#{orderId}
+    </delete>
+    
+    <select id="updateAuditsMapper"  resultType="com.wl.forms.Machine" useCache="false"> 
+    	 select b.machineid,b.machinename from bookingINfo A left join machinfo B on a.machineid=b.machineid  left join orders D on d.order_id=A.orderID where orderId=#{orderId}  and  a.machineid in
+			(select c.machine_id from MACHINEMANAGER c where  c.machine_manager_id=#{staffCode})
+    </select>
+    
+     <select id="returnmachinfo"  resultType="com.wl.forms.Machine" useCache="false"> 
+    	 select machineid,machinename from machinfo where dept_id=#{deptId} order by machineid
+			
+    </select>
+         <select id="returndept"  resultType="com.wl.forms.Dept" useCache="false"> 
+    	 select deptid id,deptname name from dept where fdeptid= '056' order by id
+			
+    </select>
+
+         <select id="getdept"  resultType="com.wl.forms.Dept" useCache="false"> 
+    	 select dept_id deptId from machinfo where machineid=#{machineId} 
+			
+    </select>
+         <select id="getMach"  resultType="com.wl.forms.Machine" useCache="false"> 
+    	 select dept_id deptId from machinfo where machineid=#{machineId} 
+			
+    </select>
+    
+    
+    <delete id="deleteAuditingBookingAll13">
+    	delete   from ORDERSMACHINESAUDITS t  where order_id=#{orderId} and machine_id=#{machineId}
+    </delete>
+    
+    <insert id="updateAuditingBookingAll13">
+    	insert into ORDERSMACHINESAUDITS t (order_ID,machine_Id,audit_person,advice,yes_no) values (#{orderId},#{machineId},#{staffCode},#{checkAdvice},#{isPass})
+    	
+    </insert>
+    
+    
+    <update id="saveAuditAdviceServiceUpdateMapper">
+    	update   BOOKINGINFO t set t.is_pass=#{isPass} ,t.is_pass_advice= #{isPassAdvice },t.audit_person= #{staffCode},t.passstate='1'  where t.unid=#{unid} and  t.orderId=#{orderId}
+    </update>
+    
+        <update id="saveAuditAdviceServiceUpdateMapper1">
+    	update   BOOKINGINFO t set t.unid=#{unid0} where t.unid=#{unid}
+    </update>
+    <select id="selectBookOrderInfoIsPassCount" resultType="int" useCache="false">
+    	select count(*) from BOOKINGINFO t where t.is_pass is null and t.orderid=#{orderId}
+    </select>
+    <select id="selectBookOrderInfoIsPassCount1" resultType="int" useCache="false">
+    	select count(*) from BOOKINGINFO t where t.is_pass = '是' and t.orderid=#{orderId} and passstate='1'
+    </select>
+        <select id="selectBookOrderInfoIsPassCount2" resultType="int" useCache="false">
+    	select count(*) from BOOKINGINFO_COMPLETED t where pass_state in(3,5) and t.order_id=#{orderId}
+    </select>
+    <select id="selectBookOrderInfoIsPassCount3" resultType="int" useCache="false">
+    	select count(*) from BOOKINGINFO_COMPLETED t where  t.unid=#{unid}
+    </select>
+    <update id="updateOrderStatus">
+    	update  orders t set t.book_status=#{bookStatus}  where t.order_id=#{orderId}
+    </update>
+</mapper>
+

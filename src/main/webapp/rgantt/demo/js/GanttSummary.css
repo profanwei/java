@@ -1,0 +1,41 @@
+﻿.mini-gantt-item-noborder
+{
+    border-color:transparent !important;
+    border-width:0;
+    overflow:visible;
+}
+.mini-gantt-item-border1,
+.mini-gantt-item-border2
+{
+    content:"";
+    position:absolute;
+    left:-1px;
+    top:-1px;
+    width:100%;
+    height:100%;
+    border:solid 1px #404040;
+    z-index:100;
+    box-sizing: border-box;
+}
+.mini-gantt-item-border1
+{
+    left:auto;
+    right:-1px;
+}
+.mini-gantt-item-border2
+{
+    border-style:dashed;
+}
+
+/*.mini-gantt-item:after
+{
+    content:"";
+    position:absolute;
+    left:0px;
+    top:0px;
+    width:50px;
+    height:100%;
+    border:solid 1px blue;
+    width:50px;
+    z-index:0;
+}*/

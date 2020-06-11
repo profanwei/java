@@ -1,0 +1,9 @@
+﻿[
+	{Name: "P1", UID: 1,
+		Tasks: [
+			{Name: "task3", UID: "p3", Start: "2007-01-09T20:00:00", Finish: "2007-01-09T23:59:59", PercentComplete: 80, Duration: 1*24*60*60},
+		]
+	},
+
+]
+

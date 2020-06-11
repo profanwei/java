@@ -1,0 +1,13 @@
+[
+						{machineId: "2001001761", machineName: "数控电火花成形机床"},	
+						{machineId: "2005011533", machineName: "数控低速走丝电火花线切割"},
+        				{machineId: "2013000822", machineName: "数控高速成型磨床"},
+        				{machineId: "2016005139", machineName: "超精密成形平面磨床"},
+        				{machineId: "SK50P", machineName: "数控车床"},
+        				{machineId: "2008001393", machineName: "CNC雕刻机"},
+        				{machineId: "2018002921", machineName: "车铣复合加工中心"},
+        				{machineId: "2007004971", machineName: "超高速磨床"},
+        				{machineId: "2012000271", machineName: "超声辅助高速加工中心"},
+        				{machineId: "2001001763", machineName: "高速五坐标加工中心"},
+        					{machineId: "VL2", machineName: "加工中心"}
+]
